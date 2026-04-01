@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Attendance Management System</title>
+<title>Attendance Management System</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -28,12 +28,6 @@
         <button onclick="addStudent()">Add Student</button>
     </div>
 
-    <!-- Search Student -->
-    <div class="form-section">
-        <h2>Search Student</h2>
-        <input type="text" id="searchName" placeholder="Search by name" onkeyup="searchStudent()">
-    </div>
-
     <!-- Student List -->
     <div class="list-section">
         <h2>Students</h2>
@@ -41,13 +35,13 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Attendance</th>
-                    <th>% Attendance</th>
+                    <th>Mark Present</th>
+                    <th>Mark Absent</th>
+                    <th>% Attendance This Month</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-            </tbody>
+            <tbody></tbody>
         </table>
         <button onclick="exportCSV()">Export CSV</button>
     </div>
