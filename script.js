@@ -1,6 +1,6 @@
-// Initialize students data
 let students = JSON.parse(localStorage.getItem('students')) || {};
 let currentSubject = 'Math';
+let today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
 
 // Ensure subject exists
 if(!students[currentSubject]) students[currentSubject] = [];
@@ -9,39 +9,47 @@ if(!students[currentSubject]) students[currentSubject] = [];
 function displayStudents() {
     const tbody = document.querySelector("#studentTable tbody");
     tbody.innerHTML = "";
+
     students[currentSubject].forEach((student, index) => {
-        let total = student.attendance.length;
-        let present = student.attendance.filter(d => d).length;
-        let percentage = total ? Math.round((present / total) * 100) : 0;
+        let month = new Date().getMonth(); // current month
+        let year = new Date().getFullYear();
+
+        // Filter attendance for this month
+        let monthlyRecords = student.attendance.filter(d => {
+            let date = new Date(d.date);
+            return date.getMonth() === month && date.getFullYear() === year;
+        });
+        let totalDays = monthlyRecords.length;
+        let presentDays = monthlyRecords.filter(d => d.status === 'Present').length;
+        let percentage = totalDays ? Math.round((presentDays / totalDays) * 100) : 0;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${student.name}</td>
-            <td>
-                <input type="checkbox" ${student.attendance[student.attendance.length-1] ? 'checked' : ''} onchange="toggleAttendance(${index})">
-            </td>
+            <td><button class="present-btn" onclick="markAttendance(${index}, 'Present')">Present</button></td>
+            <td><button class="absent-btn" onclick="markAttendance(${index}, 'Absent')">Absent</button></td>
             <td>${percentage}%</td>
             <td><button onclick="deleteStudent(${index})">Delete</button></td>
         `;
         tbody.appendChild(tr);
     });
+
     updateChart();
 }
 
 // Add student
 function addStudent() {
     const name = document.getElementById('studentName').value.trim();
-    if(name === "") return alert("Enter student name!");
-    students[currentSubject].push({name, attendance: [false]});
+    if(!name) return alert("Enter student name!");
+    students[currentSubject].push({name, attendance: []});
     document.getElementById('studentName').value = "";
     saveStudents();
     displayStudents();
 }
 
-// Toggle attendance
-function toggleAttendance(index) {
-    let arr = students[currentSubject][index].attendance;
-    arr[arr.length-1] = !arr[arr.length-1];
+// Mark attendance
+function markAttendance(index, status) {
+    students[currentSubject][index].attendance.push({date: today, status});
     saveStudents();
     displayStudents();
 }
@@ -66,39 +74,35 @@ function changeSubject() {
     displayStudents();
 }
 
-// Search student
-function searchStudent() {
-    const filter = document.getElementById('searchName').value.toLowerCase();
-    const tbody = document.querySelector("#studentTable tbody");
-    tbody.querySelectorAll('tr').forEach(tr => {
-        const name = tr.cells[0].textContent.toLowerCase();
-        tr.style.display = name.includes(filter) ? '' : 'none';
-    });
-}
-
 // Export CSV
 function exportCSV() {
-    let csv = 'Name,Attendance\n';
+    let csv = 'Name,Date,Status\n';
     students[currentSubject].forEach(s => {
-        let presentDays = s.attendance.filter(d => d).length;
-        csv += `${s.name},${presentDays}/${s.attendance.length}\n`;
+        s.attendance.forEach(a => {
+            csv += `${s.name},${a.date},${a.status}\n`;
+        });
     });
     const blob = new Blob([csv], {type: 'text/csv'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentSubject}_attendance.csv`;
+    a.href = url; a.download = `${currentSubject}_attendance.csv`;
     a.click();
 }
 
-// Update chart
+// Chart
 function updateChart() {
     const ctx = document.getElementById('attendanceChart').getContext('2d');
     const names = students[currentSubject].map(s => s.name);
     const percentages = students[currentSubject].map(s => {
-        let total = s.attendance.length;
-        let present = s.attendance.filter(d => d).length;
-        return total ? Math.round((present / total) * 100) : 0;
+        let month = new Date().getMonth();
+        let year = new Date().getFullYear();
+        let records = s.attendance.filter(d => {
+            let date = new Date(d.date);
+            return date.getMonth() === month && date.getFullYear() === year;
+        });
+        let total = records.length;
+        let present = records.filter(d => d.status === 'Present').length;
+        return total ? Math.round((present/total)*100) : 0;
     });
 
     if(window.attChart) window.attChart.destroy();
@@ -107,14 +111,12 @@ function updateChart() {
         data: {
             labels: names,
             datasets: [{
-                label: '% Attendance',
+                label: '% Attendance This Month',
                 data: percentages,
                 backgroundColor: 'rgba(54, 162, 235, 0.7)'
             }]
         },
-        options: {
-            scales: { y: { beginAtZero: true, max: 100 } }
-        }
+        options: { scales: { y: { beginAtZero:true, max:100 } } }
     });
 }
 
