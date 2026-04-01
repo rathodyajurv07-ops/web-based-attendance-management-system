@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Attendance Management System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Attendance Management System</h1>
+
+    <!-- Subject Selection -->
+    <div class="form-section">
+        <h2>Select Subject</h2>
+        <select id="subjectSelect" onchange="changeSubject()">
+            <option value="Math">Math</option>
+            <option value="Science">Science</option>
+            <option value="English">English</option>
+        </select>
+    </div>
+
+    <!-- Add Student -->
+    <div class="form-section">
+        <h2>Add Student</h2>
+        <input type="text" id="studentName" placeholder="Enter student name">
+        <button onclick="addStudent()">Add Student</button>
+    </div>
+
+    <!-- Search Student -->
+    <div class="form-section">
+        <h2>Search Student</h2>
+        <input type="text" id="searchName" placeholder="Search by name" onkeyup="searchStudent()">
+    </div>
+
+    <!-- Student List -->
+    <div class="list-section">
+        <h2>Students</h2>
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                    <th>% Attendance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="chart-section">
+        <h2>Attendance Chart</h2>
+        <canvas id="attendanceChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+<script src="chart.js"></script>
+<script src="script.js"></script>
+</body>
+  </html>
