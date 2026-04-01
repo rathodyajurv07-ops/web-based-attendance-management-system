@@ -19,26 +19,20 @@ h1, h2 {
     color: #333;
 }
 
-input, select {
+input, select, button {
     padding: 10px;
-    width: 70%;
-    margin-right: 10px;
+    margin: 5px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
 button {
-    padding: 10px 20px;
     border: none;
-    background-color: #007BFF;
-    color: white;
-    border-radius: 5px;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
+.present-btn { background-color: #28a745; color: white; }
+.absent-btn { background-color: #dc3545; color: white; }
 
 table {
     width: 100%;
@@ -66,6 +60,5 @@ tr:nth-child(even) {
 @media(max-width: 600px) {
     input, select, button {
         width: 100%;
-        margin-bottom: 10px;
     }
-  }
+}
