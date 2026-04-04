@@ -3,7 +3,7 @@ let currentSubject = 'Math';
 let today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
 
 // Ensure subject exists
-if (!students[currentSubject]) students[currentSubject] = [];
+if(!students[currentSubject]) students[currentSubject] = [];
 
 // Display students
 function displayStudents() {
@@ -11,7 +11,7 @@ function displayStudents() {
     tbody.innerHTML = "";
 
     students[currentSubject].forEach((student, index) => {
-        let month = new Date().getMonth();
+        let month = new Date().getMonth(); // current month
         let year = new Date().getFullYear();
 
         // Filter attendance for this month
@@ -19,13 +19,9 @@ function displayStudents() {
             let date = new Date(d.date);
             return date.getMonth() === month && date.getFullYear() === year;
         });
-
         let totalDays = monthlyRecords.length;
         let presentDays = monthlyRecords.filter(d => d.status === 'Present').length;
-
-        let percentage = totalDays
-            ? ((presentDays / totalDays) * 100).toFixed(2)
-            : 0;
+        let percentage = totalDays ? Math.round((presentDays / totalDays) * 100) : 0;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -44,38 +40,23 @@ function displayStudents() {
 // Add student
 function addStudent() {
     const name = document.getElementById('studentName').value.trim();
-    if (!name) return alert("Enter student name!");
-
-    students[currentSubject].push({
-        name,
-        attendance: []
-    });
-
+    if(!name) return alert("Enter student name!");
+    students[currentSubject].push({name, attendance: []});
     document.getElementById('studentName').value = "";
     saveStudents();
     displayStudents();
 }
 
-// ✅ FIXED: Mark attendance (NO DUPLICATES)
+// Mark attendance
 function markAttendance(index, status) {
-    let student = students[currentSubject][index];
-
-    // Check if already marked today
-    let existing = student.attendance.find(a => a.date === today);
-
-    if (existing) {
-        existing.status = status; // Update
-    } else {
-        student.attendance.push({ date: today, status }); // Add new
-    }
-
+    students[currentSubject][index].attendance.push({date: today, status});
     saveStudents();
     displayStudents();
 }
 
 // Delete student
 function deleteStudent(index) {
-    students[currentSubject].splice(index, 1);
+    students[currentSubject].splice(index,1);
     saveStudents();
     displayStudents();
 }
@@ -88,11 +69,7 @@ function saveStudents() {
 // Change subject
 function changeSubject() {
     currentSubject = document.getElementById('subjectSelect').value;
-
-    if (!students[currentSubject]) {
-        students[currentSubject] = [];
-    }
-
+    if(!students[currentSubject]) students[currentSubject] = [];
     saveStudents();
     displayStudents();
 }
@@ -100,47 +77,35 @@ function changeSubject() {
 // Export CSV
 function exportCSV() {
     let csv = 'Name,Date,Status\n';
-
     students[currentSubject].forEach(s => {
         s.attendance.forEach(a => {
             csv += `${s.name},${a.date},${a.status}\n`;
         });
     });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], {type: 'text/csv'});
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentSubject}_attendance.csv`;
+    a.href = url; a.download = `${currentSubject}_attendance.csv`;
     a.click();
 }
 
 // Chart
 function updateChart() {
     const ctx = document.getElementById('attendanceChart').getContext('2d');
-
     const names = students[currentSubject].map(s => s.name);
-
     const percentages = students[currentSubject].map(s => {
         let month = new Date().getMonth();
         let year = new Date().getFullYear();
-
         let records = s.attendance.filter(d => {
             let date = new Date(d.date);
             return date.getMonth() === month && date.getFullYear() === year;
         });
-
         let total = records.length;
         let present = records.filter(d => d.status === 'Present').length;
-
-        return total
-            ? ((present / total) * 100).toFixed(2)
-            : 0;
+        return total ? Math.round((present/total)*100) : 0;
     });
 
-    if (window.attChart) window.attChart.destroy();
-
+    if(window.attChart) window.attChart.destroy();
     window.attChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -151,14 +116,7 @@ function updateChart() {
                 backgroundColor: 'rgba(54, 162, 235, 0.7)'
             }]
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            }
-        }
+        options: { scales: { y: { beginAtZero:true, max:100 } } }
     });
 }
 
